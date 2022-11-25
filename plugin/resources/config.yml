@@ -1,0 +1,10 @@
+# If set to false, plguin will act like a blacklist
+whitelist: true
+# Use this only if you have whitelist set to false: https://via.krusic22.com
+# or you can use this with both the blacklist and whitelist: http://wiki.vg/Protocol_version_numbers
+versions: [759, 750]
+kick-message:
+  - ''
+  - '&cPlease join with 1.19.2,'
+  - '&calternatively use the domain nosupport.test.org but you won''t receive help!'
+allowed-domain: nosupport.test.org
