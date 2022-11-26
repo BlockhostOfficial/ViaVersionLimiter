@@ -17,11 +17,15 @@ public abstract class Config {
         this.dataFolder = dataFolder;
     }
 
+    protected boolean enable = false;
     protected boolean whitelist = true;
     protected Set<Integer> versions = new HashSet<>(Arrays.asList(759, 750));
     protected List<String> kickMessages = Arrays.asList("", "§cPlease join with 1.19.2,", "§calternatively use the domain nosupport.test.org but you won''t receive help!");
     protected String allowedDomain = "nosupport.test.org";
 
+    public boolean isEnabled() {
+        return enable;
+    }
     public boolean isWhitelist() {
         return whitelist;
     }

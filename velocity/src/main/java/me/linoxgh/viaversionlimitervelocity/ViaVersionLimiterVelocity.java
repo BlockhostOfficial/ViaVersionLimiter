@@ -39,17 +39,21 @@ public class ViaVersionLimiterVelocity {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         logger.debug("Loading plugin configurations.");
         config.loadConfig();
+        if (config.isEnabled()) logger.debug("Enabling ViaVersionLimiter..");
+        else logger.debug("ViaVersionLimiter is not enabled in the config!");
     }
 
 
     @Subscribe
     public void onProxyConnect(ServerConnectedEvent event) {
+        if (!config.isEnabled()) return;
         if (event.getServer().getServerInfo().getAddress().getHostName().startsWith(config.getAllowedDomain())) return;
 
         Player p = event.getPlayer();
         int ver = p.getProtocolVersion().getProtocol();
 
-        if (!config.getVersions().contains(ver)) {
+        if ((config.isWhitelist() && !config.getVersions().contains(ver)) ||
+                !config.isWhitelist() && config.getVersions().contains(ver)) {
             this.logger.debug("Player " + p.getUsername() + " (" + p.getUniqueId().toString() + ") tried to join with " + ver + ".");
             StringBuilder kickMsg = new StringBuilder();
             config.getKickMessages().forEach(msg -> kickMsg.append(msg).append("\n"));

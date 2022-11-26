@@ -17,16 +17,20 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         this.config = new ConfigBungee(getLogger(), getDataFolder().toPath());
 
         getProxy().getPluginManager().registerListener(this, this);
+        if (config.isEnabled()) getLogger().info("Enabling ViaVersionLimiter..");
+        else getLogger().info("ViaVersionLimiter is not enabled in the config!");
     }
 
     @EventHandler
     public void onConnect(ServerConnectedEvent event) {
+        if (!config.isEnabled()) return;
         if (event.getServer().getAddress().getHostName().startsWith(config.getAllowedDomain())) return;
 
         ProxiedPlayer p = event.getPlayer();
         int ver = p.getPendingConnection().getVersion();
 
-        if (!config.getVersions().contains(ver)) {
+        if ((config.isWhitelist() && !config.getVersions().contains(ver)) ||
+                !config.isWhitelist() && config.getVersions().contains(ver)) {
             getLogger().info("Player " + p.getName() + " (" + p.getUniqueId().toString() + ") tried to join with " + ver + ".");
             StringBuilder kickMsg = new StringBuilder();
             config.getKickMessages().forEach(msg -> kickMsg.append(msg).append("\n"));

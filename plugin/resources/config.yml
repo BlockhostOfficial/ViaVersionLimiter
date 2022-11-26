@@ -1,8 +1,19 @@
-# If set to false, plguin will act like a blacklist
+# ViaVersionLimiter
+# by Blockhost.net
+# Support Discord: https://discord.gg/GcemTB848R
+
+# Enable the plugin, false by default so you can configure it correctly
+enable: false
+
+# Example:
+# if 'whitelist' set to true and 'versions' are 759 and 760 (1.19-1.19.2), only 1.19-1.19.2 versions will be able to join without having to join through nosupport.test.org
+# if 'whitelist' set to false and 'versions' are 759 and 760 (1.19-1.19.2), only 1.19-1.19.2 versions will have to join through nosupport.test.org
+
+# If set to false, plugin will act like a blacklist
 whitelist: true
-# Use this only if you have whitelist set to false: https://via.krusic22.com
-# or you can use this with both the blacklist and whitelist: http://wiki.vg/Protocol_version_numbers
-versions: [759, 750]
+# Useful if you're using 'whitelist: false' and have many versions: https://via.krusic22.com
+# alternatively: http://wiki.vg/Protocol_version_numbers
+versions: [759, 760]
 kick-message:
   - ''
   - '&cPlease join with 1.19.2,'

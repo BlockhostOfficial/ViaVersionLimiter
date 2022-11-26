@@ -29,6 +29,7 @@ public class ConfigBungee extends Config {
             Configuration root = ConfigurationProvider.getProvider(YamlConfiguration.class)
                     .load(dataFolder.resolve("config.yml").toFile());
 
+            if (root.contains("enable")) enable = root.getBoolean("enable");
             if (root.contains("whitelist")) whitelist = root.getBoolean("whitelist");
             if (root.contains("versions"))
                 versions = new HashSet<>(root.getIntList("versions"));

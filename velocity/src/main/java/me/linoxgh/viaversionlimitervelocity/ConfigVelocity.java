@@ -32,6 +32,7 @@ public class ConfigVelocity extends Config {
 
             ConfigurationNode root = loader.load();
 
+            if (!root.getNode("enable").isVirtual()) enable = root.getNode("enable").getBoolean();
             if (!root.getNode("whitelist").isVirtual()) whitelist = root.getNode("whitelist").getBoolean();
             if (!root.getNode("versions").isVirtual())
                 versions = new HashSet<>(root.getNode("versions")
