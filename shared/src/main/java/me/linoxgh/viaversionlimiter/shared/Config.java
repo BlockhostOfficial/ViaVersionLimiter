@@ -45,7 +45,7 @@ public abstract class Config {
 
             try {
                 Files.copy(
-                        Path.of(getClass().getResource("config.yml").toURI()),
+                        Path.of(ClassLoader.getSystemResource("config.yml").toURI()),
                         dataFolder.resolve("config.yml"),
                         StandardCopyOption.REPLACE_EXISTING);
 
