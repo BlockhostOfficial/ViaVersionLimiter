@@ -19,3 +19,12 @@ kick-message:
   - '&cPlease join with 1.19.2,'
   - '&calternatively use the domain nosupport.test.org but you won''t receive help!'
 allowed-domain: nosupport.test.org
+
+enable-message: true
+reverse: false # instead of showing the message to players dont who use the versions from versions: [], show the message to the players who use that version
+message:
+  - ""
+  - ""
+delay: 2000 #ms
+on-join: true
+on-server-change: false

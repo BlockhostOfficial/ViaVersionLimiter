@@ -5,10 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public abstract class Config {
     protected final Path dataFolder;
@@ -22,6 +19,13 @@ public abstract class Config {
     protected Set<Integer> versions = new HashSet<>(Arrays.asList(759, 750));
     protected List<String> kickMessages = Arrays.asList("", "§cPlease join with 1.19.2,", "§calternatively use the domain nosupport.test.org but you won''t receive help!");
     protected String allowedDomain = "nosupport.test.org";
+
+    protected boolean enableMessage = true;
+    protected boolean reverse = false;
+    protected List<String> message = List.of("", "");
+    protected long delay = 2000;
+    protected boolean onJoin = true;
+    protected boolean onServerChange = false;
 
     public boolean isEnabled() {
         return enable;
@@ -37,6 +41,25 @@ public abstract class Config {
     }
     public String getAllowedDomain() {
         return allowedDomain;
+    }
+
+    public boolean isEnableMessage() {
+        return enableMessage;
+    }
+    public boolean isReverse() {
+        return reverse;
+    }
+    public List<String> getMessage() {
+        return message;
+    }
+    public long getDelay() {
+        return delay;
+    }
+    public boolean isOnJoin() {
+        return onJoin;
+    }
+    public boolean isOnServerChange() {
+        return onServerChange;
     }
 
     public void ensureConfigFile() throws IOException {

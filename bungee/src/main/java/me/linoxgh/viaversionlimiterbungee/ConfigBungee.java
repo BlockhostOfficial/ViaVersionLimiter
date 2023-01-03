@@ -39,6 +39,16 @@ public class ConfigBungee extends Config {
                         .collect(Collectors.toList());
             if (root.contains("allowed-domain")) allowedDomain = root.getString("allowed-domain");
 
+            if (root.contains("enable-message")) enableMessage = root.getBoolean("enable-message");
+            if (root.contains("reverse")) reverse = root.getBoolean("reverse");
+            if (root.contains("message"))
+                message = root.getStringList("message")
+                        .stream().map(s -> s.replace('&', '§'))
+                        .collect(Collectors.toList());
+            if (root.contains("delay")) delay = root.getLong("delay");
+            if (root.contains("on-join")) onJoin = root.getBoolean("on-join");
+            if (root.contains("on-server-change")) onServerChange = root.getBoolean("on-server-change");
+
             debug("Loaded plugin configurations in " + (System.currentTimeMillis() - start) / 1000 + " seconds.");
         } catch (IOException x) {
             error("Could not load plugin configurations.", x);
