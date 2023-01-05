@@ -1,6 +1,7 @@
 package me.linoxgh.viaversionlimiter.shared;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,15 +67,8 @@ public abstract class Config {
         if (!dataFolder.resolve("config.yml").toFile().exists()) {
             dataFolder.toFile().mkdirs();
 
-            try {
-                Files.copy(
-                        Path.of(ClassLoader.getSystemResource("config.yml").toURI()),
-                        dataFolder.resolve("config.yml"),
-                        StandardCopyOption.REPLACE_EXISTING);
-
-            } catch (URISyntaxException x) {
-                error("Could not save default plugin configurations.", x);
-            }
+            InputStream is = getClass().getResourceAsStream("/config.yml");
+            Files.copy(is, dataFolder.resolve("config.yml"), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
