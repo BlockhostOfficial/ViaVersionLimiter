@@ -63,7 +63,7 @@ public class ViaVersionLimiterVelocity {
     @Subscribe
     public void onProxyConnect(ServerConnectedEvent event) {
         if (!config.isEnabled()) return;
-        if (event.getServer().getServerInfo().getAddress().getHostName().startsWith(config.getAllowedDomain())) return;
+        if (event.getPlayer().getVirtualHost().get().getHostString().equalsIgnoreCase(config.getAllowedDomain())) return;
 
         Player p = event.getPlayer();
         int ver = p.getProtocolVersion().getProtocol();

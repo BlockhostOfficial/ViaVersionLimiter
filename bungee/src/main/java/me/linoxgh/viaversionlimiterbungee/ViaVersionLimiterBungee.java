@@ -9,6 +9,11 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public final class ViaVersionLimiterBungee extends Plugin implements Listener {
@@ -38,9 +43,10 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
 
     @EventHandler
     public void onConnect(ServerConnectedEvent event) {
-        if (event.getServer().getAddress().getHostName().startsWith(config.getAllowedDomain())) return;
-
         ProxiedPlayer p = event.getPlayer();
+        Optional<InetAddress> ip = getIPFromSocketAddress(p);
+        if (ip.orElse(getIpFromOldMethod(p).get()).getHostName().equalsIgnoreCase(config.getAllowedDomain())) return;
+
         int ver = p.getPendingConnection().getVersion();
 
         if (isPlayerUnsupported(p, config.isWhitelist())) {
@@ -74,5 +80,33 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
 
         return (whitelist && !config.getVersions().contains(ver)) ||
                 !whitelist && config.getVersions().contains(ver);
+    }
+
+    @SuppressWarnings("deprecation") // ProxiedPlayer#getAddress is deprecated
+    private Optional<InetAddress> getIpFromOldMethod(ProxiedPlayer player) {
+        try {
+            return Optional.ofNullable(player.getAddress()).map(InetSocketAddress::getAddress);
+        } catch (NoSuchMethodError e) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<InetAddress> getIPFromSocketAddress(ProxiedPlayer player) {
+        try {
+            SocketAddress socketAddress = player.getSocketAddress();
+            if (socketAddress instanceof InetSocketAddress) {
+                return Optional.of(((InetSocketAddress) socketAddress).getAddress());
+            }
+
+            // Unix domain socket address requires Java 16 compatibility.
+            // These connections come from the same physical machine
+            Class<?> jdk16SocketAddressType = Class.forName("java.net.UnixDomainSocketAddress");
+            if (jdk16SocketAddressType.isAssignableFrom(socketAddress.getClass())) {
+                return Optional.of(InetAddress.getLocalHost());
+            }
+        } catch (NoSuchMethodError | ClassNotFoundException | UnknownHostException e) {
+            // Ignored
+        }
+        return Optional.empty();
     }
 }
