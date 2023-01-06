@@ -35,6 +35,7 @@ broadcast: true
 broadcast-delay: 600 # seconds
 
 # Bossbar that is shown all the time to players who joined through nosupport.test.org
+# Only in Velocity!
 bossbar: true
 bossbar-message: "&cUNSUPPORTED VERSION! USE 1.19.3"
 

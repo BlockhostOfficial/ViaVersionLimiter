@@ -9,6 +9,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.linoxgh.viaversionlimiter.shared.Config;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
@@ -46,16 +47,25 @@ public class ViaVersionLimiterVelocity {
         if (config.isEnabled()) logger.debug("Enabling ViaVersionLimiter..");
         else logger.debug("ViaVersionLimiter is not enabled in the config!");
 
-        if (config.isEnableMessage()) {
+        if (config.isEnableBroadcast()) {
             proxyServer.getScheduler().buildTask(this, () -> {
                 for (Player p : proxyServer.getAllPlayers()) {
-                    if (isPlayerUnsupported(p, !config.isReverse())) {
+                    if (isPlayerUnsupported(p, config.isWhitelist())) {
                         for (String msg : config.getMessage()) {
                             p.sendMessage(Component.text(msg));
                         }
                     }
                 }
-            }).repeat(config.getDelay(), TimeUnit.MILLISECONDS).schedule();
+            }).repeat(config.getBroadcastDelay(), TimeUnit.SECONDS).schedule();
+        }
+        if (config.isEnableActionBar()) {
+            proxyServer.getScheduler().buildTask(this, () -> {
+                for (Player p : proxyServer.getAllPlayers()) {
+                    if (isPlayerUnsupported(p, config.isWhitelist())) {
+                        p.sendActionBar(Component.text(config.getActionBarMessage()));
+                    }
+                }
+            }).repeat(2, TimeUnit.SECONDS).schedule();
         }
     }
 
@@ -78,12 +88,15 @@ public class ViaVersionLimiterVelocity {
         if (config.isEnableMessage()) {
             if (event.getPreviousServer().isEmpty() && config.isOnJoin() ||
                     event.getPreviousServer().isPresent() && config.isOnServerChange()) {
-                if (isPlayerUnsupported(p, !config.isReverse())) {
+                if (isPlayerUnsupported(p, config.isWhitelist())) {
                     for (String msg : config.getMessage()) {
                         p.sendMessage(Component.text(msg));
                     }
                 }
             }
+        }
+        if (config.isEnableBossBar()) {
+            p.showBossBar(BossBar.bossBar(Component.text(config.getBossBarMessage()), 1, BossBar.Color.RED, BossBar.Overlay.PROGRESS));
         }
     }
 

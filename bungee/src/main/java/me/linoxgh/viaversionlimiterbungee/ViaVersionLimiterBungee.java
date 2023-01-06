@@ -1,6 +1,7 @@
 package me.linoxgh.viaversionlimiterbungee;
 
 import me.linoxgh.viaversionlimiter.shared.Config;
+import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
@@ -31,13 +32,22 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         }
         getProxy().getPluginManager().registerListener(this, this);
 
-        if (config.isEnableMessage()) {
+        if (config.isEnableBroadcast()) {
             getProxy().getScheduler().schedule(this, () -> {
                 for (ProxiedPlayer p : getProxy().getPlayers()) {
-                    if (isPlayerUnsupported(p, !config.isReverse()))
+                    if (isPlayerUnsupported(p, config.isWhitelist()))
                         p.sendMessages(config.getMessage().toArray(String[]::new));
                 }
-            }, config.getDelay(), config.getDelay(), TimeUnit.MILLISECONDS);
+            }, config.getBroadcastDelay(), config.getBroadcastDelay(), TimeUnit.SECONDS);
+        }
+        if (config.isEnableActionBar()) {
+            getProxy().getScheduler().schedule(this, () -> {
+                for (ProxiedPlayer p : getProxy().getPlayers()) {
+                    if (isPlayerUnsupported(p, config.isWhitelist())) {
+                        p.sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(config.getActionBarMessage()));
+                    }
+                }
+            }, 2, TimeUnit.SECONDS);
         }
     }
 
@@ -58,7 +68,7 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         }
 
         if (config.isEnableMessage() && config.isOnJoin()) {
-            if (isPlayerUnsupported(p, !config.isReverse())) {
+            if (isPlayerUnsupported(p, config.isWhitelist())) {
                 p.sendMessages(config.getMessage().toArray(String[]::new));
             }
         }
@@ -69,7 +79,7 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         ProxiedPlayer p = event.getPlayer();
 
         if (config.isEnableMessage() && config.isOnServerChange()) {
-            if (isPlayerUnsupported(p, !config.isReverse())) {
+            if (isPlayerUnsupported(p, config.isWhitelist())) {
                 p.sendMessages(config.getMessage().toArray(String[]::new));
             }
         }
