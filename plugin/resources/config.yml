@@ -20,11 +20,24 @@ kick-message:
   - '&calternatively use the domain nosupport.test.org but you won''t receive help!'
 allowed-domain: nosupport.test.org
 
+# Message that will be shown to all the players who joined through nosupport.test.org
 enable-message: true
-reverse: false # instead of showing the message to players dont who use the versions from versions: [], show the message to the players who use that version
 message:
-  - ""
-  - ""
-delay: 2000 #ms
+  - "&cYou're using an unsupported version!"
+  - "&cYou will not receive help and your bugs won't be fixed!"
+  - "&ePlease use 1.19.3!"
+# show the message to the player on join
 on-join: true
-on-server-change: false
+# show the message to the player on server change
+on-server-change: true
+# show the message to the every 600 seconds (default)
+broadcast: true
+broadcast-delay: 600 # seconds
+
+# Bossbar that is shown all the time to players who joined through nosupport.test.org
+bossbar: true
+bossbar-message: "&cUNSUPPORTED VERSION! USE 1.19.3"
+
+# Action bar that is shown all the time to players who joined through nosupport.test.org
+actionbar: true
+actionbar-message: '&cUNSUPPORTED VERSION! USE 1.19.3'

@@ -45,15 +45,22 @@ public class ConfigVelocity extends Config {
             if (!root.getNode("allowed-domain").isVirtual()) allowedDomain = root.getNode("allowed-domain").getString();
 
             if (!root.getNode("enable-message").isVirtual()) enableMessage = root.getNode("enable-message").getBoolean();
-            if (!root.getNode("reverse").isVirtual()) reverse = root.getNode("reverse").getBoolean();
             if (!root.getNode("message").isVirtual())
                 message = root.getNode("message")
                         .getList(TypeToken.of(String.class))
                         .stream().map(s -> s.replace('&', '§'))
                         .collect(Collectors.toList());
-            if (!root.getNode("delay").isVirtual()) delay = root.getNode("delay").getLong();
             if (!root.getNode("on-join").isVirtual()) onJoin = root.getNode("on-join").getBoolean();
             if (!root.getNode("on-server-change").isVirtual()) onServerChange = root.getNode("on-server-change").getBoolean();
+
+            if (!root.getNode("broadcast").isVirtual()) enableBroadcast = root.getNode("broadcast").getBoolean();
+            if (!root.getNode("broadcast-delay").isVirtual()) broadcastDelay = root.getNode("broadcast-delay").getLong();
+
+            if (!root.getNode("bossbar").isVirtual()) enableBossBar = root.getNode("bossbar").getBoolean();
+            if (!root.getNode("bossbar-message").isVirtual()) bossBarMessage = root.getNode("bossbar-message").getString();
+
+            if (!root.getNode("actionbar").isVirtual()) enableActionBar = root.getNode("actionbar").getBoolean();
+            if (!root.getNode("actionbar-message").isVirtual()) actionBarMessage = root.getNode("actionbar-message").getString();
 
             debug("Loaded plugin configurations in " + (System.currentTimeMillis() - start) / 1000 + " seconds.");
         } catch (IOException | ObjectMappingException x) {

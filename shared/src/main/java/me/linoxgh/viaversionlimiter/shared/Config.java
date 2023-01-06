@@ -2,7 +2,6 @@ package me.linoxgh.viaversionlimiter.shared;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -17,16 +16,21 @@ public abstract class Config {
 
     protected boolean enable = false;
     protected boolean whitelist = true;
-    protected Set<Integer> versions = new HashSet<>(Arrays.asList(759, 750));
+    protected Set<Integer> versions = new HashSet<>(Arrays.asList(759, 760));
     protected List<String> kickMessages = Arrays.asList("", "§cPlease join with 1.19.2,", "§calternatively use the domain nosupport.test.org but you won''t receive help!");
     protected String allowedDomain = "nosupport.test.org";
 
     protected boolean enableMessage = true;
-    protected boolean reverse = false;
     protected List<String> message = List.of("", "");
-    protected long delay = 2000;
     protected boolean onJoin = true;
     protected boolean onServerChange = false;
+    protected boolean enableBroadcast = true;
+    protected long broadcastDelay = 600;
+
+    protected boolean enableBossBar = true;
+    protected String bossBarMessage = "&cUNSUPPORTED VERSION! USE 1.19.3";
+    protected boolean enableActionBar = true;
+    protected String actionBarMessage = "&cUNSUPPORTED VERSION! USE 1.19.3";
 
     public boolean isEnabled() {
         return enable;
@@ -47,20 +51,33 @@ public abstract class Config {
     public boolean isEnableMessage() {
         return enableMessage;
     }
-    public boolean isReverse() {
-        return reverse;
-    }
     public List<String> getMessage() {
         return message;
-    }
-    public long getDelay() {
-        return delay;
     }
     public boolean isOnJoin() {
         return onJoin;
     }
     public boolean isOnServerChange() {
         return onServerChange;
+    }
+    public boolean isEnableBroadcast() {
+        return enableBroadcast;
+    }
+    public long getBroadcastDelay() {
+        return broadcastDelay;
+    }
+
+    public boolean isEnableBossBar() {
+        return enableBossBar;
+    }
+    public String getBossBarMessage() {
+        return bossBarMessage;
+    }
+    public boolean isEnableActionBar() {
+        return enableActionBar;
+    }
+    public String getActionBarMessage() {
+        return actionBarMessage;
     }
 
     public void ensureConfigFile() throws IOException {

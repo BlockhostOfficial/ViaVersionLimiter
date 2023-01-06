@@ -40,14 +40,21 @@ public class ConfigBungee extends Config {
             if (root.contains("allowed-domain")) allowedDomain = root.getString("allowed-domain");
 
             if (root.contains("enable-message")) enableMessage = root.getBoolean("enable-message");
-            if (root.contains("reverse")) reverse = root.getBoolean("reverse");
             if (root.contains("message"))
                 message = root.getStringList("message")
                         .stream().map(s -> s.replace('&', '§'))
                         .collect(Collectors.toList());
-            if (root.contains("delay")) delay = root.getLong("delay");
             if (root.contains("on-join")) onJoin = root.getBoolean("on-join");
             if (root.contains("on-server-change")) onServerChange = root.getBoolean("on-server-change");
+
+            if (root.contains("broadcast")) enableBroadcast = root.getBoolean("broadcast");
+            if (root.contains("broadcast-delay")) broadcastDelay = root.getLong("broadcast-delay");
+
+            if (root.contains("bossbar")) enableBossBar = root.getBoolean("bossbar");
+            if (root.contains("bossbar-message")) bossBarMessage = root.getString("bossbar-message");
+
+            if (root.contains("actionbar")) enableActionBar = root.getBoolean("actionbar");
+            if (root.contains("actionbar-message")) actionBarMessage = root.getString("actionbar-message");
 
             debug("Loaded plugin configurations in " + (System.currentTimeMillis() - start) / 1000 + " seconds.");
         } catch (IOException x) {
