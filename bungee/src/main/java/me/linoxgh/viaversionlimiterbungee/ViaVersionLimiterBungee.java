@@ -35,7 +35,7 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         if (config.isEnableBroadcast()) {
             getProxy().getScheduler().schedule(this, () -> {
                 for (ProxiedPlayer p : getProxy().getPlayers()) {
-                    if (isPlayerUnsupported(p, config.isWhitelist()))
+                    if (isPlayerUnsupported(p, !config.isWhitelist()))
                         p.sendMessages(config.getMessage().toArray(String[]::new));
                 }
             }, config.getBroadcastDelay(), config.getBroadcastDelay(), TimeUnit.SECONDS);
@@ -43,7 +43,7 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         if (config.isEnableActionBar()) {
             getProxy().getScheduler().schedule(this, () -> {
                 for (ProxiedPlayer p : getProxy().getPlayers()) {
-                    if (isPlayerUnsupported(p, config.isWhitelist())) {
+                    if (isPlayerUnsupported(p, !config.isWhitelist())) {
                         p.sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(config.getActionBarMessage()));
                     }
                 }
@@ -68,7 +68,7 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         }
 
         if (config.isEnableMessage() && config.isOnJoin()) {
-            if (isPlayerUnsupported(p, config.isWhitelist())) {
+            if (isPlayerUnsupported(p, !config.isWhitelist())) {
                 p.sendMessages(config.getMessage().toArray(String[]::new));
             }
         }
@@ -79,7 +79,7 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         ProxiedPlayer p = event.getPlayer();
 
         if (config.isEnableMessage() && config.isOnServerChange()) {
-            if (isPlayerUnsupported(p, config.isWhitelist())) {
+            if (isPlayerUnsupported(p, !config.isWhitelist())) {
                 p.sendMessages(config.getMessage().toArray(String[]::new));
             }
         }

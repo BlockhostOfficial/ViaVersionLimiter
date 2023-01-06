@@ -50,7 +50,7 @@ public class ViaVersionLimiterVelocity {
         if (config.isEnableBroadcast()) {
             proxyServer.getScheduler().buildTask(this, () -> {
                 for (Player p : proxyServer.getAllPlayers()) {
-                    if (isPlayerUnsupported(p, config.isWhitelist())) {
+                    if (isPlayerUnsupported(p, !config.isWhitelist())) {
                         for (String msg : config.getMessage()) {
                             p.sendMessage(Component.text(msg));
                         }
@@ -61,7 +61,7 @@ public class ViaVersionLimiterVelocity {
         if (config.isEnableActionBar()) {
             proxyServer.getScheduler().buildTask(this, () -> {
                 for (Player p : proxyServer.getAllPlayers()) {
-                    if (isPlayerUnsupported(p, config.isWhitelist())) {
+                    if (isPlayerUnsupported(p, !config.isWhitelist())) {
                         p.sendActionBar(Component.text(config.getActionBarMessage()));
                     }
                 }
@@ -88,7 +88,7 @@ public class ViaVersionLimiterVelocity {
         if (config.isEnableMessage()) {
             if (event.getPreviousServer().isEmpty() && config.isOnJoin() ||
                     event.getPreviousServer().isPresent() && config.isOnServerChange()) {
-                if (isPlayerUnsupported(p, config.isWhitelist())) {
+                if (isPlayerUnsupported(p, !config.isWhitelist())) {
                     for (String msg : config.getMessage()) {
                         p.sendMessage(Component.text(msg));
                     }
@@ -96,7 +96,9 @@ public class ViaVersionLimiterVelocity {
             }
         }
         if (config.isEnableBossBar()) {
-            p.showBossBar(BossBar.bossBar(Component.text(config.getBossBarMessage()), 1, BossBar.Color.RED, BossBar.Overlay.PROGRESS));
+            if (isPlayerUnsupported(p, !config.isWhitelist())) {
+                p.showBossBar(BossBar.bossBar(Component.text(config.getBossBarMessage()), 1, BossBar.Color.RED, BossBar.Overlay.PROGRESS));
+            }
         }
     }
 
