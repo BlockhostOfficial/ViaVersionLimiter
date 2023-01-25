@@ -1,6 +1,7 @@
 package me.linoxgh.viaversionlimiterbungee;
 
 import me.linoxgh.viaversionlimiter.shared.Config;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -9,12 +10,14 @@ import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.protocol.packet.BossBar;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public final class ViaVersionLimiterBungee extends Plugin implements Listener {
@@ -70,6 +73,28 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         if (config.isEnableMessage() && config.isOnJoin()) {
             if (isPlayerUnsupported(p, config.isWhitelist())) {
                 p.sendMessages(config.getMessage().toArray(String[]::new));
+            }
+        }
+
+        if (config.isEnableBossBar()) {
+            if (isPlayerUnsupported(p, config.isWhitelist())) {
+                BossBar bossBar = new BossBar(UUID.randomUUID(), 0);
+                bossBar.setTitle(ChatColor.translateAlternateColorCodes('&', config.getBossBarMessage()));
+                bossBar.setHealth(1);
+
+                int color = 2;
+                switch (config.getBossBarColor()) {
+                    case "PINK" -> color = 0;
+                    case "BLUE" -> color = 1;
+                    case "GREEN" -> color = 3;
+                    case "YELLOW" -> color = 4;
+                    case "PURPLE" -> color = 5;
+                    case "WHITE" -> color = 6;
+                }
+                bossBar.setColor(color);
+                bossBar.setDivision(1);
+
+                p.unsafe().sendPacket(bossBar);
             }
         }
     }

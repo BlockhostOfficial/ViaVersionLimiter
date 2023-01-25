@@ -30,14 +30,15 @@ message:
 on-join: true
 # show the message to the player on server change
 on-server-change: true
-# show the message to the every 600 seconds (default)
+# show the message to the player every 600 seconds (default)
 broadcast: true
 broadcast-delay: 600 # seconds
 
 # Bossbar that is shown all the time to players who joined through nosupport.test.org
-# Only in Velocity!
+# Applicable colors: RED, BLUE, GREEN, PINK, PURPLE, WHITE, YELLOW
 bossbar: true
 bossbar-message: "&cUNSUPPORTED VERSION! USE 1.19.3"
+bossbar-color: RED
 
 # Action bar that is shown all the time to players who joined through nosupport.test.org
 actionbar: true

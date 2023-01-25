@@ -58,6 +58,7 @@ public class ConfigVelocity extends Config {
 
             if (!root.getNode("bossbar").isVirtual()) enableBossBar = root.getNode("bossbar").getBoolean();
             if (!root.getNode("bossbar-message").isVirtual()) bossBarMessage = root.getNode("bossbar-message").getString();
+            if (!root.getNode("bossbar-color").isVirtual()) bossBarColor = root.getNode("bossbar-color").getString();
 
             if (!root.getNode("actionbar").isVirtual()) enableActionBar = root.getNode("actionbar").getBoolean();
             if (!root.getNode("actionbar-message").isVirtual()) actionBarMessage = root.getNode("actionbar-message").getString();

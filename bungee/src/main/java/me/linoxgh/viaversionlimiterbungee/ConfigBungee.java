@@ -52,6 +52,7 @@ public class ConfigBungee extends Config {
 
             if (root.contains("bossbar")) enableBossBar = root.getBoolean("bossbar");
             if (root.contains("bossbar-message")) bossBarMessage = root.getString("bossbar-message");
+            if (root.contains("bossbar-color")) bossBarColor = root.getString("bossbar-color");
 
             if (root.contains("actionbar")) enableActionBar = root.getBoolean("actionbar");
             if (root.contains("actionbar-message")) actionBarMessage = root.getString("actionbar-message");

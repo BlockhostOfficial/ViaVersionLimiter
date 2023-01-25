@@ -89,7 +89,12 @@ public class ViaVersionLimiterVelocity {
         }
         if (config.isEnableBossBar()) {
             if (isPlayerUnsupported(p, config.isWhitelist())) {
-                p.showBossBar(BossBar.bossBar(deserialize(config.getBossBarMessage()), 1, BossBar.Color.RED, BossBar.Overlay.NOTCHED_6));
+                p.showBossBar(
+                        BossBar.bossBar(
+                                deserialize(config.getBossBarMessage()),
+                                1,
+                                BossBar.Color.valueOf(config.getBossBarColor()),
+                                BossBar.Overlay.NOTCHED_6));
             }
         }
 

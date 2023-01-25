@@ -29,6 +29,7 @@ public abstract class Config {
 
     protected boolean enableBossBar = true;
     protected String bossBarMessage = "&cUNSUPPORTED VERSION! USE 1.19.3";
+    protected String bossBarColor = "RED";
     protected boolean enableActionBar = true;
     protected String actionBarMessage = "&cUNSUPPORTED VERSION! USE 1.19.3";
 
@@ -72,6 +73,9 @@ public abstract class Config {
     }
     public String getBossBarMessage() {
         return bossBarMessage;
+    }
+    public String getBossBarColor() {
+        return bossBarColor;
     }
     public boolean isEnableActionBar() {
         return enableActionBar;
