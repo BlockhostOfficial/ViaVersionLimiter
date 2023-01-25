@@ -10,7 +10,8 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.linoxgh.viaversionlimiter.shared.Config;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
@@ -50,9 +51,9 @@ public class ViaVersionLimiterVelocity {
         if (config.isEnableBroadcast()) {
             proxyServer.getScheduler().buildTask(this, () -> {
                 for (Player p : proxyServer.getAllPlayers()) {
-                    if (isPlayerUnsupported(p, !config.isWhitelist())) {
+                    if (isPlayerUnsupported(p, config.isWhitelist())) {
                         for (String msg : config.getMessage()) {
-                            p.sendMessage(Component.text(msg));
+                            p.sendMessage(deserialize(msg));
                         }
                     }
                 }
@@ -61,8 +62,8 @@ public class ViaVersionLimiterVelocity {
         if (config.isEnableActionBar()) {
             proxyServer.getScheduler().buildTask(this, () -> {
                 for (Player p : proxyServer.getAllPlayers()) {
-                    if (isPlayerUnsupported(p, !config.isWhitelist())) {
-                        p.sendActionBar(Component.text(config.getActionBarMessage()));
+                    if (isPlayerUnsupported(p, config.isWhitelist())) {
+                        p.sendActionBar(deserialize(config.getActionBarMessage()));
                     }
                 }
             }).repeat(2, TimeUnit.SECONDS).schedule();
@@ -73,32 +74,33 @@ public class ViaVersionLimiterVelocity {
     @Subscribe
     public void onProxyConnect(ServerConnectedEvent event) {
         if (!config.isEnabled()) return;
-        if (event.getPlayer().getVirtualHost().get().getHostString().equalsIgnoreCase(config.getAllowedDomain())) return;
 
         Player p = event.getPlayer();
-        int ver = p.getProtocolVersion().getProtocol();
-
-        if (isPlayerUnsupported(p, config.isWhitelist())) {
-            this.logger.debug("Player " + p.getUsername() + " (" + p.getUniqueId().toString() + ") tried to join with " + ver + ".");
-            StringBuilder kickMsg = new StringBuilder();
-            config.getKickMessages().forEach(msg -> kickMsg.append(msg).append("\n"));
-            p.disconnect(Component.text(kickMsg.substring(0, kickMsg.length() - 1)));
-        }
 
         if (config.isEnableMessage()) {
             if (event.getPreviousServer().isEmpty() && config.isOnJoin() ||
                     event.getPreviousServer().isPresent() && config.isOnServerChange()) {
-                if (isPlayerUnsupported(p, !config.isWhitelist())) {
+                if (isPlayerUnsupported(p, config.isWhitelist())) {
                     for (String msg : config.getMessage()) {
-                        p.sendMessage(Component.text(msg));
+                        p.sendMessage(deserialize(msg));
                     }
                 }
             }
         }
         if (config.isEnableBossBar()) {
-            if (isPlayerUnsupported(p, !config.isWhitelist())) {
-                p.showBossBar(BossBar.bossBar(Component.text(config.getBossBarMessage()), 1, BossBar.Color.RED, BossBar.Overlay.NOTCHED_6));
+            if (isPlayerUnsupported(p, config.isWhitelist())) {
+                p.showBossBar(BossBar.bossBar(deserialize(config.getBossBarMessage()), 1, BossBar.Color.RED, BossBar.Overlay.NOTCHED_6));
             }
+        }
+
+        if (event.getPlayer().getVirtualHost().get().getHostString().equalsIgnoreCase(config.getAllowedDomain())) return;
+
+        int ver = p.getProtocolVersion().getProtocol();
+        if (isPlayerUnsupported(p, config.isWhitelist())) {
+            this.logger.debug("Player " + p.getUsername() + " (" + p.getUniqueId().toString() + ") tried to join with " + ver + ".");
+            StringBuilder kickMsg = new StringBuilder();
+            config.getKickMessages().forEach(msg -> kickMsg.append(msg).append("\n"));
+            p.disconnect(deserialize(kickMsg.substring(0, kickMsg.length() - 1)));
         }
     }
 
@@ -107,5 +109,10 @@ public class ViaVersionLimiterVelocity {
 
         return (whitelist && !config.getVersions().contains(ver)) ||
                 !whitelist && config.getVersions().contains(ver);
+    }
+
+    private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacy('&');
+    public TextComponent deserialize(String text) {
+        return serializer.deserialize(text);
     }
 }
