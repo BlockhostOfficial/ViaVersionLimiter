@@ -20,6 +20,9 @@ kick-message:
   - '&calternatively use the domain nosupport.test.org but you won''t receive help!'
 allowed-domain: nosupport.test.org
 
+# All of the settings below will be shown to the versions from "versions: []" unless whitelist is set to false,
+# then it will be the reverse. It doesn't matter what IP player joins through.
+
 # Message that will be shown to all the players who joined through nosupport.test.org
 enable-message: true
 message:
