@@ -5,6 +5,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -16,12 +17,15 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public final class ViaVersionLimiterBungee extends Plugin implements Listener {
     private Config config;
+    private final Set<UUID> bossBar = new HashSet<>();
 
     @Override
     public void onEnable() {
@@ -77,7 +81,7 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
         }
 
         if (config.isEnableBossBar()) {
-            if (isPlayerUnsupported(p, config.isWhitelist())) {
+            if (isPlayerUnsupported(p, config.isWhitelist()) && !this.bossBar.contains(p.getUniqueId())) {
                 BossBar bossBar = new BossBar(UUID.randomUUID(), 0);
                 bossBar.setTitle(ChatColor.translateAlternateColorCodes('&', config.getBossBarMessage()));
                 bossBar.setHealth(1);
@@ -95,6 +99,7 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
                 bossBar.setDivision(1);
 
                 p.unsafe().sendPacket(bossBar);
+                this.bossBar.add(p.getUniqueId());
             }
         }
     }
@@ -108,6 +113,11 @@ public final class ViaVersionLimiterBungee extends Plugin implements Listener {
                 p.sendMessages(config.getMessage().toArray(String[]::new));
             }
         }
+    }
+
+    @EventHandler
+    public void onDisconnect(PlayerDisconnectEvent event) {
+        bossBar.remove(event.getPlayer().getUniqueId());
     }
 
     private boolean isPlayerUnsupported(ProxiedPlayer p, boolean whitelist) {

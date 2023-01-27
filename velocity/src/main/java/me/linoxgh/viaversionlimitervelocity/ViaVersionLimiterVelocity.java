@@ -1,6 +1,7 @@
 package me.linoxgh.viaversionlimitervelocity;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
@@ -15,6 +16,9 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Plugin(
@@ -31,6 +35,7 @@ public class ViaVersionLimiterVelocity {
     private final Path dataFolder;
 
     private final Config config;
+    private final Set<UUID> bossBar = new HashSet<>();
 
     @Inject public ViaVersionLimiterVelocity(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataFolder) {
         this.proxyServer = proxyServer;
@@ -70,7 +75,6 @@ public class ViaVersionLimiterVelocity {
         }
     }
 
-
     @Subscribe
     public void onProxyConnect(ServerConnectedEvent event) {
         if (!config.isEnabled()) return;
@@ -88,13 +92,13 @@ public class ViaVersionLimiterVelocity {
             }
         }
         if (config.isEnableBossBar()) {
-            if (isPlayerUnsupported(p, config.isWhitelist())) {
-                p.showBossBar(
-                        BossBar.bossBar(
-                                deserialize(config.getBossBarMessage()),
-                                1,
-                                BossBar.Color.valueOf(config.getBossBarColor()),
-                                BossBar.Overlay.NOTCHED_6));
+            if (isPlayerUnsupported(p, config.isWhitelist()) && !bossBar.contains(p.getUniqueId())) {
+                p.showBossBar(BossBar.bossBar(
+                        deserialize(config.getBossBarMessage()),
+                        1,
+                        BossBar.Color.valueOf(config.getBossBarColor()),
+                        BossBar.Overlay.NOTCHED_6));
+                bossBar.add(p.getUniqueId());
             }
         }
 
@@ -107,6 +111,11 @@ public class ViaVersionLimiterVelocity {
             config.getKickMessages().forEach(msg -> kickMsg.append(msg).append("\n"));
             p.disconnect(deserialize(kickMsg.substring(0, kickMsg.length() - 1)));
         }
+    }
+
+    @Subscribe
+    public void onProxyDisconnect(DisconnectEvent event) {
+        bossBar.remove(event.getPlayer().getUniqueId());
     }
 
     private boolean isPlayerUnsupported(Player p, boolean whitelist) {
