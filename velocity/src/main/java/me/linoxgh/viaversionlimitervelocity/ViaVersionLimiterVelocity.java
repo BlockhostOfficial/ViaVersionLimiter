@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @Plugin(
         id = "viaversionlimitervelocity",
         name = "ViaVersionLimiterVelocity",
-        version = "1.1",
+        version = "1.2",
         description = "Kick the players with unverified minecraft versions.",
         authors = {"LinoxGH"}
 )
