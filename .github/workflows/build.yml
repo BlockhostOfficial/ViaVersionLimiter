@@ -1,0 +1,41 @@
+name: Build and upload JAR
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build with Gradle
+        run: ./gradlew build --stacktrace
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: ViaVersionLimiter
+          path: |
+            build/libs/ViaVersionLimiter-*.jar
+            !build/libs/*-unshaded.jar
+          if-no-files-found: error

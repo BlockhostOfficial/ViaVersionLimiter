@@ -11,7 +11,6 @@ import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -23,14 +22,6 @@ import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.Optional;
 
-@Plugin(
-        id = "viaversionlimitervelocity",
-        name = "ViaVersionLimiter",
-        version = "2.0.0-SNAPSHOT",
-        description = "Enforce Minecraft protocol version policy before backend connection.",
-        url = "https://github.com/BlockhostOfficial/ViaVersionLimiter",
-        authors = {"Blockhost", "AlexProgrammerDE"}
-)
 public final class ViaVersionLimiter {
     private final ProxyServer proxyServer;
     private final Logger logger;

@@ -1,0 +1,13 @@
+{
+  "id": "viaversionlimitervelocity",
+  "name": "ViaVersionLimiter",
+  "version": "${version}",
+  "description": "${description}",
+  "url": "https://github.com/BlockhostOfficial/ViaVersionLimiter",
+  "authors": [
+    "Blockhost",
+    "AlexProgrammerDE"
+  ],
+  "dependencies": [],
+  "main": "com.enderdash.agent.viaversionlimiter.ViaVersionLimiter"
+}

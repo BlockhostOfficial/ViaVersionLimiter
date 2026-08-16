@@ -1,0 +1,57 @@
+name: Set version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to set
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    outputs:
+      commit-sha:
+        description: Commit containing the requested version
+        value: ${{ jobs.set-version.outputs.commit-sha }}
+
+permissions:
+  contents: write
+
+jobs:
+  set-version:
+    name: Set version
+    runs-on: ubuntu-24.04
+    outputs:
+      commit-sha: ${{ steps.revision.outputs.commit-sha }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Validate version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [[ ! "$VERSION" =~ ^[0-9A-Za-z][0-9A-Za-z._+-]*$ ]]; then
+            echo "Invalid version: $VERSION" >&2
+            exit 1
+          fi
+
+      - name: Set Gradle version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: sed -i "s/^mavenVersion=.*/mavenVersion=$VERSION/" gradle.properties
+
+      - name: Commit version
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore(release): bump version to ${{ inputs.version }}"
+
+      - name: Resolve version commit
+        id: revision
+        run: echo "commit-sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"

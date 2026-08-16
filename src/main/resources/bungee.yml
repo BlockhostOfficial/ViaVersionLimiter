@@ -1,5 +1,5 @@
 name: ViaVersionLimiter
 main: com.enderdash.agent.viaversionlimiter.bungee.BungeeViaVersionLimiter
-version: 2.0.0-SNAPSHOT
+version: ${version}
 author: Blockhost
-description: Enforce Minecraft protocol version policy before backend connection.
+description: ${description}

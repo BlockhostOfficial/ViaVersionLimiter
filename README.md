@@ -11,8 +11,8 @@ The plugin reads the client protocol reported by the proxy. It does not require 
 
 ## Install the plugin
 
-1. Download or build `ViaVersionLimiter-2.0.0-SNAPSHOT.jar`.
-2. Copy the same JAR into the proxy's `plugins` directory.
+1. Download or build `ViaVersionLimiter-<version>.jar`.
+2. Copy the same JAR into the `plugins` directory of the proxy.
 3. Start the proxy once to generate `config.yml`.
 4. Configure the version policy and bypass hostname.
 5. Set `enabled: true`.
@@ -31,7 +31,7 @@ The policy has three outcomes:
 
 - A supported protocol connects normally.
 - An unsupported protocol using the exact bypass hostname connects and receives the configured warnings.
-- Every other unsupported connection is rejected during the proxy's login event, before it reaches a backend server.
+- Every other unsupported connection is rejected during the proxy login event, before it reaches a backend server.
 
 Hostname matching is case-insensitive, ignores a trailing DNS dot, and requires an exact match. A missing or malformed virtual hostname does not qualify for bypass access. The plugin never performs a DNS lookup to decide whether a connection used the bypass hostname.
 
@@ -56,7 +56,7 @@ Environment variables use the `CONFIG_VIAVERSIONLIMITER` prefix supported by 6b6
 - `ALLOWLIST` supports only the listed protocol IDs.
 - `BLOCKLIST` supports every protocol ID except those listed.
 
-`policy.versions` must contain at least one non-negative protocol ID. Use the [Minecraft protocol version table](https://minecraft.wiki/w/Java_Edition_protocol/Protocol_version_numbers) when translating game versions to protocol IDs.
+`policy.versions` must contain at least one non-negative protocol ID. To translate game versions, use the [Minecraft protocol version table](https://minecraft.wiki/w/Java_Edition_protocol/Protocol_version_numbers).
 
 Set `policy.bypass-domain` to the exact hostname reserved for unsupported clients. Set it to an empty string to disable bypass access.
 
@@ -84,10 +84,32 @@ If reload validation fails, the previous valid configuration remains active and 
 
 ## Build from source
 
-Builds require Java 25 or newer and Maven 3.9 or newer.
+Builds require Java 25 or newer. The Gradle wrapper downloads the expected Gradle version automatically.
 
 ```bash
-mvn clean verify
+./gradlew clean build
 ```
 
-The build produces one shaded plugin at `target/ViaVersionLimiter-2.0.0-SNAPSHOT.jar`. It contains both `velocity-plugin.json` and `bungee.yml`, along with relocated 6b6t Commons configuration dependencies.
+The build runs the test suite. It produces one deployable, shaded plugin at `build/libs/ViaVersionLimiter-<version>.jar`.
+
+Do not install the `-unshaded.jar` from the same directory. This file is an intermediate artifact.
+
+The project version is defined by `mavenVersion` in `gradle.properties`. Gradle expands that value into both proxy descriptors, so the Velocity and BungeeCord metadata always matches the artifact name.
+
+## Build and release automation
+
+The GitHub Actions workflows follow the same version-bump and release sequence used by PistonMOTD:
+
+- `Build and upload JAR` runs tests and builds the shaded JAR for pushes and pull requests, then uploads it as a workflow artifact.
+- `Set version` updates `mavenVersion` and commits the change to `main`. It can be run directly or called by another workflow.
+- `Publish release` validates the requested versions and commits the release version. It builds the JAR and generates a categorized changelog.
+- The same workflow creates the GitHub tag and release. It uploads the JAR and commits the next snapshot version.
+
+To publish a release, run `Publish release` from the GitHub Actions page and provide:
+
+- `version`: the release version without `-SNAPSHOT`, such as `2.0.0`.
+- `after-version`: the next development version ending in `-SNAPSHOT`, such as `2.0.1-SNAPSHOT`.
+
+Both version changes are normal commits on `main`. If the build or release fails, the workflow does not commit the next snapshot version.
+
+The `./changelog.sh` command shows a compact list of commits since the latest tag.
