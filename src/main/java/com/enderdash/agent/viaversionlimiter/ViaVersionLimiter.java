@@ -1,10 +1,9 @@
 package com.enderdash.agent.viaversionlimiter;
 
 import com.enderdash.agent.viaversionlimiter.config.LimiterConfiguration;
-import com.enderdash.agent.viaversionlimiter.config.LimiterConfigurationLoader;
+import com.enderdash.agent.viaversionlimiter.config.LimiterConfigurationHolder;
 import com.enderdash.agent.viaversionlimiter.policy.ConnectionDecision;
 import com.google.inject.Inject;
-import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -20,11 +19,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Plugin(
         id = "viaversionlimitervelocity",
@@ -37,9 +34,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class ViaVersionLimiter {
     private final ProxyServer proxyServer;
     private final Logger logger;
-    private final LimiterConfigurationLoader configurationLoader;
+    private final Path configPath;
     private final PlayerNotificationService notifications;
-    private final AtomicReference<LimiterConfiguration> configuration = new AtomicReference<>();
+    private volatile LimiterConfigurationHolder configurationHolder;
 
     @Inject
     public ViaVersionLimiter(
@@ -49,7 +46,7 @@ public final class ViaVersionLimiter {
     ) {
         this.proxyServer = proxyServer;
         this.logger = logger;
-        configurationLoader = new LimiterConfigurationLoader(dataDirectory);
+        configPath = dataDirectory.resolve("config.yml");
         notifications = new PlayerNotificationService(proxyServer, this);
     }
 
@@ -64,7 +61,7 @@ public final class ViaVersionLimiter {
 
     @Subscribe(priority = Short.MIN_VALUE, async = false)
     public void onLogin(LoginEvent event) {
-        LimiterConfiguration current = configuration.get();
+        LimiterConfiguration current = currentConfiguration();
         if (current == null || !current.enabled() || !event.getResult().isAllowed()) {
             return;
         }
@@ -104,10 +101,17 @@ public final class ViaVersionLimiter {
         notifications.close();
     }
 
-    ReloadResult reloadConfiguration(boolean enforceExistingPlayers) {
+    synchronized ReloadResult reloadConfiguration(boolean enforceExistingPlayers) {
         try {
-            LimiterConfiguration loaded = configurationLoader.load();
-            configuration.set(loaded);
+            LimiterConfigurationHolder holder = configurationHolder;
+            LimiterConfiguration loaded;
+            if (holder == null) {
+                holder = new LimiterConfigurationHolder(configPath);
+                configurationHolder = holder;
+                loaded = holder.get();
+            } else {
+                loaded = holder.reload().validated();
+            }
             notifications.reconfigure(loaded);
             if (enforceExistingPlayers && loaded.enabled()) {
                 enforceExistingPlayers(loaded);
@@ -115,37 +119,32 @@ public final class ViaVersionLimiter {
             logger.info(
                     "Loaded ViaVersionLimiter configuration: enabled={}, mode={}, protocols={}, bypassHost={}",
                     loaded.enabled(),
-                    loaded.policy().versions().mode(),
-                    loaded.policy().versions().protocols().size(),
-                    loaded.policy().bypassHost().expectedHost().orElse("disabled")
+                    loaded.connectionPolicy().versions().mode(),
+                    loaded.connectionPolicy().versions().protocols().size(),
+                    loaded.connectionPolicy().bypassHost().expectedHost().orElse("disabled")
             );
             return new ReloadResult(true, "ViaVersionLimiter configuration reloaded.");
-        } catch (IOException exception) {
+        } catch (RuntimeException exception) {
             logger.error("Could not load ViaVersionLimiter configuration", exception);
             return new ReloadResult(false, "Reload failed. Check the proxy log for details.");
         }
     }
 
     Component statusMessage() {
-        LimiterConfiguration current = configuration.get();
+        LimiterConfiguration current = currentConfiguration();
         if (current == null) {
             return Component.text("ViaVersionLimiter has no valid configuration.", NamedTextColor.RED);
         }
         String state = current.enabled() ? "enabled" : "disabled";
         String summary = "ViaVersionLimiter is " + state
-                + "; mode=" + current.policy().versions().mode()
-                + "; protocols=" + current.policy().versions().protocols().size()
-                + "; bypass=" + current.policy().bypassHost().expectedHost().orElse("disabled");
+                + "; mode=" + current.connectionPolicy().versions().mode()
+                + "; protocols=" + current.connectionPolicy().versions().protocols().size()
+                + "; bypass=" + current.connectionPolicy().bypassHost().expectedHost().orElse("disabled");
         return Component.text(summary, current.enabled() ? NamedTextColor.GREEN : NamedTextColor.YELLOW);
     }
 
     private void registerCommand() {
-        CommandManager commandManager = proxyServer.getCommandManager();
-        var metadata = commandManager.metaBuilder("viaversionlimiter")
-                .aliases("vvl")
-                .plugin(this)
-                .build();
-        commandManager.register(metadata, new LimiterCommand(this));
+        LimiterCommandBrigadier.register(proxyServer, this, this);
     }
 
     private void enforceExistingPlayers(LimiterConfiguration current) {
@@ -162,7 +161,7 @@ public final class ViaVersionLimiter {
     }
 
     private static ConnectionDecision evaluate(LimiterConfiguration current, Player player) {
-        return current.policy().evaluate(
+        return current.connectionPolicy().evaluate(
                 player.getProtocolVersion().getProtocol(),
                 virtualHost(player)
         );
@@ -170,6 +169,11 @@ public final class ViaVersionLimiter {
 
     private static Optional<String> virtualHost(Player player) {
         return player.getVirtualHost().map(InetSocketAddress::getHostString);
+    }
+
+    private LimiterConfiguration currentConfiguration() {
+        LimiterConfigurationHolder holder = configurationHolder;
+        return holder == null ? null : holder.get();
     }
 
     record ReloadResult(boolean successful, String message) {

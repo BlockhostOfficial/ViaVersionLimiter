@@ -6,6 +6,11 @@
       "description": "Keep Velocity on the deployed 3.6 API line",
       "matchPackageNames": ["com.velocitypowered:velocity-api"],
       "allowedVersions": "/^3\\.6\\./"
+    },
+    {
+      "description": "Keep BungeeCord on the deployed 26.1 API line",
+      "matchPackageNames": ["net.md-5:bungeecord-api"],
+      "allowedVersions": "/^26\\.1-/"
     }
   ]
 }

@@ -1,24 +1,29 @@
 # ViaVersionLimiter
 
-ViaVersionLimiter enforces a Minecraft protocol policy at the Velocity login boundary. Unsupported clients are rejected before Velocity connects them to a backend server. You can optionally expose one exact hostname that admits unsupported clients with persistent warnings.
+ViaVersionLimiter enforces a Minecraft protocol policy at the proxy login boundary. The same JAR supports Velocity and BungeeCord. Unsupported clients are rejected before the proxy connects them to a backend server, unless they use the configured bypass hostname.
 
-The plugin reads the protocol reported by Velocity. It does not require ViaVersion or ViaBackwards.
+The plugin reads the client protocol reported by the proxy. It does not require ViaVersion or ViaBackwards.
 
 ## Requirements
 
-- Java 21 or newer
-- Velocity 3.6
+- Java 25 or newer
+- Velocity 3.6 or BungeeCord 26.1
 
 ## Install the plugin
 
 1. Download or build `ViaVersionLimiter-2.0.0-SNAPSHOT.jar`.
-2. Copy the JAR into the proxy's `plugins` directory.
-3. Start the proxy once to create `plugins/viaversionlimitervelocity/config.yml`.
+2. Copy the same JAR into the proxy's `plugins` directory.
+3. Start the proxy once to generate `config.yml`.
 4. Configure the version policy and bypass hostname.
 5. Set `enabled: true`.
 6. Run `/viaversionlimiter reload` or restart the proxy.
 
-The default configuration is disabled so a new installation cannot reject players before its policy is reviewed.
+The configuration is stored at:
+
+- Velocity: `plugins/viaversionlimitervelocity/config.yml`
+- BungeeCord: `plugins/ViaVersionLimiter/config.yml`
+
+The generated configuration is disabled by default so a new installation cannot reject players before its policy is reviewed.
 
 ## Connection behavior
 
@@ -26,40 +31,23 @@ The policy has three outcomes:
 
 - A supported protocol connects normally.
 - An unsupported protocol using the exact bypass hostname connects and receives the configured warnings.
-- Every other unsupported connection is rejected during `LoginEvent`, before it reaches a backend server.
+- Every other unsupported connection is rejected during the proxy's login event, before it reaches a backend server.
 
-Hostname matching is case-insensitive, ignores a trailing DNS dot, and requires an exact match. A missing virtual hostname does not qualify for bypass access.
+Hostname matching is case-insensitive, ignores a trailing DNS dot, and requires an exact match. A missing or malformed virtual hostname does not qualify for bypass access. The plugin never performs a DNS lookup to decide whether a connection used the bypass hostname.
 
 Reloading an enabled configuration applies it to connected players. Unsupported players on the bypass hostname remain connected. Unsupported players on other hostnames are disconnected.
 
-## Upgrade from v1
+## Configuration and migrations
 
-Version 2 uses a new configuration structure and requires `config-version: 2`. It refuses to load the legacy format instead of inferring a policy that could accidentally allow or reject players.
+Configuration loading, atomic reloads, backups, environment overrides, and schema migrations use [6b6t Commons](https://github.com/6b6t/6b6t-commons). The current schema uses `version: 2` and is shared by both proxy adapters.
 
-Move the old values as follows:
+Existing configurations are migrated automatically:
 
-| v1 setting | v2 setting |
-| --- | --- |
-| `whitelist: true` | `policy.mode: ALLOWLIST` |
-| `whitelist: false` | `policy.mode: BLOCKLIST` |
-| `versions` | `policy.versions` |
-| `allowed-domain` | `policy.bypass-domain` |
-| `kick-message` | `kick-message` |
-| `enable-message` | `notifications.message.enabled` |
-| `on-join` | `notifications.message.on-join` |
-| `on-server-change` | `notifications.message.on-server-change` |
-| `message` | `notifications.message.lines` |
-| `broadcast` | `notifications.broadcast.enabled` |
-| `broadcast-delay` | `notifications.broadcast.interval-seconds` |
-| `bossbar` | `notifications.bossbar.enabled` |
-| `bossbar-message` | `notifications.bossbar.message` |
-| `bossbar-color` | `notifications.bossbar.color` |
-| `actionbar` | `notifications.actionbar.enabled` |
-| `actionbar-message` | `notifications.actionbar.message` |
+- Legacy v1 flat configurations are converted to the nested v2 structure.
+- The earlier `config-version: 2` format is converted to the Commons-managed `version: 2` field.
+- A timestamped backup is created before migration.
 
-Replace the old file with the bundled [v2 configuration](src/main/resources/config.yml), then apply the relevant values from this table.
-
-## Configuration reference
+Environment variables use the `CONFIG_VIAVERSIONLIMITER` prefix supported by 6b6t Commons.
 
 ### Version policy
 
@@ -78,7 +66,7 @@ Set `policy.bypass-domain` to the exact hostname reserved for unsupported client
 
 Message strings use legacy ampersand color codes, such as `&c` for red and `&e` for yellow.
 
-The available boss bar colors are `BLUE`, `GREEN`, `PINK`, `PURPLE`, `RED`, `WHITE`, and `YELLOW`.
+The available boss bar colors are `BLUE`, `GREEN`, `PINK`, `PURPLE`, `RED`, `WHITE`, and `YELLOW`. BungeeCord skips boss bars for clients older than Minecraft 1.9 because those protocols do not support them.
 
 Both periodic intervals are measured in seconds and must be greater than zero.
 
@@ -90,16 +78,16 @@ Both periodic intervals are measured in seconds and must be greater than zero.
 | `/viaversionlimiter reload` | Validate and atomically activate the configuration. |
 | `/vvl` | Short alias for `/viaversionlimiter`. |
 
-Commands require the `viaversionlimiter.admin` permission.
+Commands require the `viaversionlimiter.admin` permission. Velocity command registration and help use 6b6t Commons with StrokkCommands. BungeeCord uses a native adapter over the same configuration and policy services because the Commons command module does not provide a BungeeCord registrar.
 
 If reload validation fails, the previous valid configuration remains active and the proxy log reports the invalid setting.
 
 ## Build from source
 
-Builds require Java 21 or newer and Maven 3.9 or newer.
+Builds require Java 25 or newer and Maven 3.9 or newer.
 
 ```bash
 mvn clean verify
 ```
 
-The shaded plugin JAR is written to `target/ViaVersionLimiter-2.0.0-SNAPSHOT.jar`. The verification build runs the policy and configuration tests before packaging.
+The build produces one shaded plugin at `target/ViaVersionLimiter-2.0.0-SNAPSHOT.jar`. It contains both `velocity-plugin.json` and `bungee.yml`, along with relocated 6b6t Commons configuration dependencies.

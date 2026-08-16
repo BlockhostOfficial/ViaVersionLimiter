@@ -79,10 +79,11 @@ final class PlayerNotificationService implements AutoCloseable {
         }
 
         LimiterConfiguration.Notifications notifications = current.notifications();
-        boolean shouldSend = notifications.messageEnabled()
-                && (serverChange ? notifications.onServerChange() : notifications.onJoin());
+        LimiterConfiguration.Message message = notifications.message();
+        boolean shouldSend = message.enabled()
+                && (serverChange ? message.onServerChange() : message.onJoin());
         if (shouldSend) {
-            sendMessages(player, notifications.message());
+            sendMessages(player, message.lines());
         }
     }
 
@@ -98,7 +99,7 @@ final class PlayerNotificationService implements AutoCloseable {
         bypassedPlayers.stream()
                 .map(proxyServer::getPlayer)
                 .flatMap(java.util.Optional::stream)
-                .forEach(player -> sendMessages(player, current.notifications().message()));
+                .forEach(player -> sendMessages(player, current.notifications().message().lines()));
     }
 
     private void broadcastActionBars() {
@@ -123,7 +124,7 @@ final class PlayerNotificationService implements AutoCloseable {
             BossBar bossBar = BossBar.bossBar(
                     LegacyTextRenderer.render(settings.message()),
                     1.0f,
-                    settings.color(),
+                    BossBar.Color.valueOf(settings.color().name()),
                     BossBar.Overlay.PROGRESS
             );
             player.showBossBar(bossBar);

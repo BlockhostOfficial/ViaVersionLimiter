@@ -1,56 +1,61 @@
 package com.enderdash.agent.viaversionlimiter;
 
-import com.velocitypowered.api.command.SimpleCommand;
+import com.mojang.brigadier.context.CommandContext;
+import com.velocitypowered.api.command.CommandSource;
+import net.blockhost.commons.commands.help.CommandDescription;
+import net.blockhost.commons.commands.help.HelpInjector;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.strokkur.commands.Aliases;
+import net.strokkur.commands.Command;
+import net.strokkur.commands.CustomExecutorWrapper;
+import net.strokkur.commands.Executes;
+import net.strokkur.commands.permission.Permission;
 
-import java.util.List;
-import java.util.Locale;
+import java.lang.reflect.Method;
+import java.util.function.Function;
 
-final class LimiterCommand implements SimpleCommand {
-    private static final String PERMISSION = "viaversionlimiter.admin";
-    private static final List<String> SUBCOMMANDS = List.of("reload", "status");
+@CustomExecutorWrapper
+@interface LimiterHelpWrapper {
+}
 
+@Aliases("vvl")
+@Command("viaversionlimiter")
+@LimiterHelpWrapper
+@Permission("viaversionlimiter.admin")
+public final class LimiterCommand {
     private final ViaVersionLimiter plugin;
 
-    LimiterCommand(ViaVersionLimiter plugin) {
+    public LimiterCommand(ViaVersionLimiter plugin) {
         this.plugin = plugin;
     }
 
-    @Override
-    public void execute(Invocation invocation) {
-        String[] arguments = invocation.arguments();
-        if (arguments.length == 0 || arguments[0].equalsIgnoreCase("status")) {
-            invocation.source().sendMessage(plugin.statusMessage());
-            return;
-        }
-        if (arguments.length == 1 && arguments[0].equalsIgnoreCase("reload")) {
-            ViaVersionLimiter.ReloadResult result = plugin.reloadConfiguration(true);
-            invocation.source().sendMessage(Component.text(
-                    result.message(),
-                    result.successful() ? NamedTextColor.GREEN : NamedTextColor.RED
-            ));
-            return;
-        }
-        invocation.source().sendMessage(Component.text(
-                "Usage: /viaversionlimiter <reload|status>",
-                NamedTextColor.RED
+    @Executes
+    public void help(CommandContext<CommandSource> context) {
+        HelpInjector.sendDefaultHelp(context, Function.identity());
+    }
+
+    @LimiterHelpWrapper
+    public static com.mojang.brigadier.Command<CommandSource> helpInjection(
+            com.mojang.brigadier.Command<CommandSource> command,
+            Method method
+    ) {
+        return HelpInjector.wrapCommand(command, method);
+    }
+
+    @CommandDescription("Shows the active version policy and bypass hostname.")
+    @Executes("status")
+    public void status(CommandSource source) {
+        source.sendMessage(plugin.statusMessage());
+    }
+
+    @CommandDescription("Reloads and validates the ViaVersionLimiter configuration.")
+    @Executes("reload")
+    public void reload(CommandSource source) {
+        ViaVersionLimiter.ReloadResult result = plugin.reloadConfiguration(true);
+        source.sendMessage(Component.text(
+                result.message(),
+                result.successful() ? NamedTextColor.GREEN : NamedTextColor.RED
         ));
-    }
-
-    @Override
-    public List<String> suggest(Invocation invocation) {
-        if (invocation.arguments().length > 1) {
-            return List.of();
-        }
-        String prefix = invocation.arguments().length == 0
-                ? ""
-                : invocation.arguments()[0].toLowerCase(Locale.ROOT);
-        return SUBCOMMANDS.stream().filter(value -> value.startsWith(prefix)).toList();
-    }
-
-    @Override
-    public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission(PERMISSION);
     }
 }
