@@ -1,0 +1,44 @@
+# Incremented when the configuration structure changes.
+config-version: 2
+
+# Keep enforcement disabled until the policy and bypass DNS are ready.
+enabled: false
+
+policy:
+  # ALLOWLIST permits only the listed protocols. BLOCKLIST rejects only the listed protocols.
+  mode: ALLOWLIST
+  versions: [769]
+
+  # Unsupported clients may connect only through this exact hostname.
+  # Set this to an empty string to disable bypass access.
+  bypass-domain: nosupport.example.org
+
+kick-message:
+  - ''
+  - '&cUnsupported Minecraft version.'
+  - '&ePlease connect with a supported version.'
+  - ''
+
+# Notifications apply only to unsupported players admitted through the bypass domain.
+notifications:
+  message:
+    enabled: true
+    on-join: true
+    on-server-change: false
+    lines:
+      - '&cYou are using an unsupported Minecraft version.'
+      - '&eSupport is not available for this client version.'
+
+  broadcast:
+    enabled: true
+    interval-seconds: 600
+
+  bossbar:
+    enabled: true
+    message: '&cUNSUPPORTED MINECRAFT VERSION'
+    color: RED
+
+  actionbar:
+    enabled: true
+    message: '&ePlease switch to a supported Minecraft version.'
+    interval-seconds: 2

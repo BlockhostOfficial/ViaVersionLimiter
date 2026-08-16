@@ -1,3 +1,0 @@
-name: ViaVersionLimiterBungee
-version: '${project.version}'
-main: me.linoxgh.viaversionlimiterbungee.ViaVersionLimiterBungee
