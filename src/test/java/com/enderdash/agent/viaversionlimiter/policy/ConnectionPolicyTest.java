@@ -55,6 +55,27 @@ class ConnectionPolicyTest {
     }
 
     @Test
+    void wildcardBypassAcceptsUnsupportedProtocolsOnEveryHost() {
+        ConnectionPolicy withoutHostEnforcement = new ConnectionPolicy(
+                policy.versions(),
+                HostMatcher.any()
+        );
+
+        assertEquals(
+                ConnectionDecision.BYPASSED,
+                withoutHostEnforcement.evaluate(578, Optional.of("play.example.org"))
+        );
+        assertEquals(
+                ConnectionDecision.BYPASSED,
+                withoutHostEnforcement.evaluate(578, Optional.of("another.example.net"))
+        );
+        assertEquals(
+                ConnectionDecision.BYPASSED,
+                withoutHostEnforcement.evaluate(578, Optional.empty())
+        );
+    }
+
+    @Test
     void malformedHandshakeHostsFailClosed() {
         assertEquals(ConnectionDecision.REJECTED, policy.evaluate(578, Optional.of("bad host")));
         assertEquals(ConnectionDecision.REJECTED, policy.evaluate(578, Optional.of(" ")));

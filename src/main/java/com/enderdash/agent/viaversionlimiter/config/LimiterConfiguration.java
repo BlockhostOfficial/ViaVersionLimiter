@@ -19,7 +19,7 @@ public final class LimiterConfiguration extends VersionAwareConfiguration {
     @Comment("Keep enforcement disabled until the policy and bypass DNS are ready.")
     private boolean enabled;
 
-    @Comment("Minecraft protocol policy and the optional exact bypass hostname.")
+    @Comment("Minecraft protocol policy and the optional bypass hostname.")
     private Policy policy = new Policy();
 
     @Comment("Message sent when an unsupported client is rejected during login.")
@@ -30,7 +30,7 @@ public final class LimiterConfiguration extends VersionAwareConfiguration {
             ""
     );
 
-    @Comment("Warnings sent only to unsupported clients admitted through the bypass hostname.")
+    @Comment("Warnings sent to unsupported clients admitted by the bypass policy.")
     private Notifications notifications = new Notifications();
 
     public LimiterConfiguration() {
@@ -48,9 +48,11 @@ public final class LimiterConfiguration extends VersionAwareConfiguration {
                 Set.copyOf(requireValues(current.versions, "policy.versions"))
         );
         String bypassDomain = Objects.requireNonNull(current.bypassDomain, "policy.bypass-domain is required").strip();
-        HostMatcher hostMatcher = bypassDomain.isEmpty()
-                ? HostMatcher.disabled()
-                : HostMatcher.exact(bypassDomain);
+        HostMatcher hostMatcher = switch (bypassDomain) {
+            case "" -> HostMatcher.disabled();
+            case "*" -> HostMatcher.any();
+            default -> HostMatcher.exact(bypassDomain);
+        };
         return new ConnectionPolicy(versionPolicy, hostMatcher);
     }
 
@@ -85,7 +87,7 @@ public final class LimiterConfiguration extends VersionAwareConfiguration {
         @Comment("Minecraft protocol IDs interpreted according to mode.")
         private List<Integer> versions = List.of(769);
 
-        @Comment("Exact hostname for unsupported clients. Leave empty to disable bypass access.")
+        @Comment("Hostname for unsupported clients. Use '*' for all hosts or leave empty to disable bypass access.")
         private String bypassDomain = "nosupport.example.org";
     }
 

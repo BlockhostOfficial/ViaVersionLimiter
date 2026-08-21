@@ -30,10 +30,12 @@ The generated configuration is disabled by default so a new installation cannot 
 The policy has three outcomes:
 
 - A supported protocol connects normally.
-- An unsupported protocol using the exact bypass hostname connects and receives the configured warnings.
+- An unsupported protocol admitted by the bypass policy connects and receives the configured warnings.
 - Every other unsupported connection is rejected during the proxy login event, before it reaches a backend server.
 
-Hostname matching is case-insensitive, ignores a trailing DNS dot, and requires an exact match. A missing or malformed virtual hostname does not qualify for bypass access. The plugin never performs a DNS lookup to decide whether a connection used the bypass hostname.
+Exact hostname matching is case-insensitive and ignores a trailing DNS dot. The plugin does not perform a DNS lookup.
+
+Set the bypass hostname to `*` to admit unsupported clients from every hostname. These clients receive the configured warnings.
 
 Reloading an enabled configuration applies it to connected players. Unsupported players on the bypass hostname remain connected. Unsupported players on other hostnames are disconnected.
 
@@ -58,7 +60,7 @@ Environment variables use the `CONFIG_VIAVERSIONLIMITER` prefix supported by 6b6
 
 `policy.versions` must contain at least one non-negative protocol ID. To translate game versions, use the [Minecraft protocol version table](https://minecraft.wiki/w/Java_Edition_protocol/Protocol_version_numbers).
 
-Set `policy.bypass-domain` to the exact hostname reserved for unsupported clients. Set it to an empty string to disable bypass access.
+Set `policy.bypass-domain` to an exact hostname for restricted bypass access. Set it to `*` to admit unsupported clients from every hostname. Set it to an empty string to disable bypass access.
 
 ### Messages
 

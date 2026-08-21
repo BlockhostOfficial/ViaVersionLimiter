@@ -95,4 +95,24 @@ class LimiterConfigurationHolderTest {
 
         assertThrows(RuntimeException.class, () -> new LimiterConfigurationHolder(configPath));
     }
+
+    @Test
+    void loadsWildcardBypassPolicy() throws IOException {
+        Path configPath = temporaryDirectory.resolve("config.yml");
+        Files.writeString(configPath, """
+                version: 2
+                enabled: true
+                policy:
+                  mode: BLOCKLIST
+                  versions: [773]
+                  bypass-domain: '*'
+                """);
+
+        LimiterConfiguration configuration = new LimiterConfigurationHolder(configPath).get();
+
+        assertEquals(
+                ConnectionDecision.BYPASSED,
+                configuration.connectionPolicy().evaluate(773, Optional.of("play.example.org"))
+        );
+    }
 }

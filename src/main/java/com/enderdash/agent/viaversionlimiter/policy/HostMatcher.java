@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class HostMatcher {
+    private static final String WILDCARD = "*";
+
     private final Optional<String> expectedHost;
 
     private HostMatcher(Optional<String> expectedHost) {
@@ -21,8 +23,18 @@ public final class HostMatcher {
         return new HostMatcher(Optional.empty());
     }
 
+    public static HostMatcher any() {
+        return new HostMatcher(Optional.of(WILDCARD));
+    }
+
     public boolean matches(Optional<String> candidate) {
-        if (expectedHost.isEmpty() || candidate.isEmpty()) {
+        if (expectedHost.isEmpty()) {
+            return false;
+        }
+        if (expectedHost.get().equals(WILDCARD)) {
+            return true;
+        }
+        if (candidate.isEmpty()) {
             return false;
         }
 
