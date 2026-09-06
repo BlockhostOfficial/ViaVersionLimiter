@@ -39,7 +39,7 @@ dependencies {
 
     implementation("com.github.6b6t.6b6t-commons:commons-config:$commonsVersion")
     implementation("com.github.6b6t.6b6t-commons:commons-commands-core:$commonsVersion")
-    implementation("org.yaml:snakeyaml:2.4")
+    implementation("org.yaml:snakeyaml:2.7")
 
     compileOnly("net.strokkur.commands:annotations-velocity:$strokkurCommandsVersion")
     compileOnly("net.strokkur.commands:annotations-common-permission:$strokkurCommandsVersion")
