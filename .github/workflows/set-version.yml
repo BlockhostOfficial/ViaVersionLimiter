@@ -23,7 +23,7 @@ permissions:
 jobs:
   set-version:
     name: Set version
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       commit-sha: ${{ steps.revision.outputs.commit-sha }}
 
