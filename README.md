@@ -115,3 +115,8 @@ To publish a release, run `Publish release` from the GitHub Actions page and pro
 Both version changes are normal commits on `main`. If the build or release fails, the workflow does not commit the next snapshot version.
 
 The `./changelog.sh` command shows a compact list of commits since the latest tag.
+
+## Contributing and support
+
+Read [the contribution guide](CONTRIBUTING.md) for development and review.
+Use [the support guide](SUPPORT.md) for questions and issue routing.
